@@ -1,0 +1,1 @@
+###The main goal of this project is to create a display for my desk that shows that current day's comic. As of right now this is based on the 5.65inch ACeP 7-Color E-Paper from waveshare and an ESP-32 
