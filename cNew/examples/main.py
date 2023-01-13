@@ -10,8 +10,11 @@ import os
 
 
 def getdata(url):
-    r = requests.get(url)
-    return r.text
+    try:
+        r = requests.get(url)
+        return r.text
+    except:
+        return "error"
 
 
 # src="https://assets.amuniversal.com/
@@ -168,16 +171,97 @@ def dither(title):
                         error[i, j - 1] += extracolor * 5 / 16
                     if i + 1 < width and j - 1 >= 0:
                         error[i + 1, j - 1] += extracolor * 1 / 16
+        print("Done Dithering")
         Image.fromarray(newbmp).save("/home/pi/Desktop/cNew/"+title+ ".bmp")
 
     except FileNotFoundError:
         file_error(title + ".gif")
 
+def getAndSaveToFileWeatherData():
+    htmldata = getdata("https://forecast.weather.gov/MapClick.php?x=304&y=258&site=iwx&zmx=&zmy=&map_x=304&map_y=258")
+    soup = BeautifulSoup(htmldata, 'html.parser')
+    
+    
+    weatherData = []
+    weatherBox = soup.find_all('div', class_="tombstone-container")
+    count = 0
+    for dayInfo in weatherBox:
+        tempArray = []
+        if dayInfo.find(class_="period-name").get_text().find("NOW") != -1: # Sometimes there are warnings and I don't care about them so this skips those
+            continue
+    
+        if count % 2 == 0:
+            temp = dayInfo.find(class_="period-name").get_text()
+            temp = temp.replace("ThisAfternoon", "Today")
+            temp = temp.replace("Night", "")
+            temp = temp.replace("Day", "")
+            tempArray.append(temp)
+    
+            temp = dayInfo.find(class_="short-desc").get_text()
+            temp = temp.replace("Chance", "")
+            tempArray.append(temp)
+    
+            temp = dayInfo.find(class_="temp").get_text()
+            temp=temp.replace("High: ", "")
+            temp=temp.replace("Low: ", "")
+            temp=temp.replace(" °F", "")
+            tempArray.append(temp)
+    
+            weatherData.append(tempArray)
+        else:
+            temp = dayInfo.find(class_="temp").get_text()
+            temp=temp.replace("High: ","")
+            temp=temp.replace("Low: ", "")
+            temp=temp.replace(" °F", "")
+            #print(temps)
+            weatherData[len(weatherData)-1][2] += "|" + temp
+        # temp.replace("This","")
+        # temp.replace("Night", "")
+        # print(dayInfo)
+        if count == 0 and tempArray[0] == 'Tonight':
+            weatherData[0][2] = "?|"+weatherData[0][2]
+            count = 0
+        else:
+            count += 1
+    
+    
+    
+    file = open('/home/pi/Desktop/cNew/weather.txt','w')
+    
+    # JD - This makes sure that there is a space before each capital letter
+    # count = 0
+    # countMessage = 0
+    # tempMessage = ""
+    # isNoSpacePresentBefore = 0
+    # for x in range(2):
+    #     tempMessage = ""
+    #     for char in weatherData[x][2]:
+    #         if char.isupper() and count != 0 and isNoSpacePresentBefore:
+    #             tempMessage += " " + char
+    #         else:
+    #             if char == ' ':
+    #                 isNoSpacePresentBefore = 0
+    #             else:
+    #                 isNoSpacePresentBefore = 1
+    #
+    #             tempMessage += char
+    #         count += 1
+    #     weatherData[x][2] = tempMessage
+    #     countMessage += 1
+    for x in range(len(weatherData)):
+        file.write(",".join(weatherData[x]))
+        file.write('\n')
+    for x in weatherData:
+        print(x)
+    print("")
+    
+    file.close()
+
 
 def main():
     print("Looking for BMP")
     
-    with open('cartoons.txt') as f:
+    with open('/home/pi/Desktop/cNew/cartoons.txt') as f:
         cartoon = f.readlines()
     # Getting current time
     current_time = datetime.datetime.now()
@@ -190,46 +274,36 @@ def main():
         if not find_file((inputPath+title + ".bmp")):
             print("Going to: "+"https://www.gocomics.com/"+title+"/" + dateArr[0] + "/" + dateArr[1] + "/" + dateArr[2])
             htmldata = getdata("https://www.gocomics.com/"+title+"/" + dateArr[0] + "/" + dateArr[1] + "/" + dateArr[2])
-            # htmldata = getdata("https://www.gocomics.com/garfield/2022/07/20")
-            soup = BeautifulSoup(htmldata, 'html.parser')
-            imgContainer = soup.find_all("picture", class_='item-comic-image')
-            imgPlace = soup.findAll('img')
-            soup.select('src')
-            results = []
-            for a in soup.find_all(attrs={'class': 'item-comic-image'}):
-                name = a.find("img")
-                results.append(name.get("src"))
-            print("Found image link: "+results[0])
-            try:
-                urllib.request.urlretrieve(results[0], (inputPath + title + ".gif"))
-            except IndexError:
-                print("Image isn't present. Likely comic hasn't been uploaded yet")
-                
-            print("Downloaded Image")
-            print("Dithering Image")
+            if htmldata == "error":
+                print("Error likely do to no connection")
+                continue
+            else:
+                # htmldata = getdata("https://www.gocomics.com/garfield/2022/07/20")
+                soup = BeautifulSoup(htmldata, 'html.parser')
+                imgContainer = soup.find_all("picture", class_='item-comic-image')
+                imgPlace = soup.findAll('img')
+                soup.select('src')
+                results = []
+                for a in soup.find_all(attrs={'class': 'item-comic-image'}):
+                    name = a.find("img")
+                    results.append(name.get("src"))
+                print("Found image link: "+results[0])
+                try:
+                    urllib.request.urlretrieve(results[0], (inputPath + title + ".gif"))
+                except IndexError:
+                    print("Image isn't present. Likely comic hasn't been uploaded yet")
+                    
+                print("Downloaded Image")
+                print("Dithering Image")
 
-            dither(inputPath + title)
-            # This will do color dither but sucks balls
-
-            # OLD WAY
-    #         img = Image.open(inputPath + ".gif")
-    #         
-    #         fixed_width = 600
-    #         width_percent = (fixed_width / float(img.size[0]))
-    #         height_size = int((float(img.size[1]) * float(width_percent)))
-    #         img = img.resize((fixed_width, height_size), PIL.Image.NEAREST)
-    #         numpydata = np.array(img)
-    #         
-    #         floyd_steinberg(numpydata)
-    #         im = Image.fromarray(numpydata)
-    # 
-    #         im.save(str(dateArr[0] + "-" + dateArr[1] + "-" + dateArr[2]) + ".bmp")
-            print("Done")
+                dither(inputPath + title)
 
         else:
             print(inputPath+" "+title+" already exists"+"      " )
         
     print("\n")
+    getAndSaveToFileWeatherData()
+    
 
 if __name__ == '__main__':
     main()

@@ -1,0 +1,5 @@
+Tonight,Rain/Snow,?|31
+Friday,Slight Rain/Snowthen Slight SnowShowers,32|20
+Saturday,Sunny,33|23
+Sunday,Partly Sunny,40|31
+M.L.King,Rain/Snowthen ShowersLikely,46|42
