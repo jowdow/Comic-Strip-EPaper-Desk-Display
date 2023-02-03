@@ -259,7 +259,11 @@ def getAndSaveToFileWeatherData():
 
 
 def main():
-    print("Looking for BMP")
+    print("Starting weather parsing")
+    getAndSaveToFileWeatherData()
+    print("Done with weather")
+    print("\n")
+    print("Starting Comic Downloads")
     
     with open('/home/pi/Desktop/cNew/cartoons.txt') as f:
         cartoon = f.readlines()
@@ -302,7 +306,6 @@ def main():
             print(inputPath+" "+title+" already exists"+"      " )
         
     print("\n")
-    getAndSaveToFileWeatherData()
     
 
 if __name__ == '__main__':

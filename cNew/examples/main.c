@@ -302,6 +302,7 @@ int main(void)
             sprintf( day,"%d", tm.tm_mday );// JD - We update here because I only want it to update the day when we know there is a new comic
             system("python /home/pi/Desktop/cNew/examples/main.py");
             initCartoonVar();
+            initWeatherVar();
             
             isDataUpdated = TRUE;
         }
@@ -309,7 +310,7 @@ int main(void)
             isDataUpdated = FALSE;    
         }
         
-        if( ( (  (char)min[1]=='0' ) && isNewMinute) || isFirstRun){ // JD - We display a new image every 10 mins 
+        if( ( (  (char)min[1]=='0' ) && isNewMinute) || isFirstRun){ // JD - If it is 10,20,30,40,50,60  and it is a new minute or it is our first time running
             if(isFirstRun){
                 isFirstRun = FALSE;
             }
