@@ -5,7 +5,7 @@ The main idea is that the RPI will web scrape for the comic strip image and then
 
 ## Setting up the [Raspbeery Pi Zero 2 W](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/)
 
-I am still figuring out which steps I would recommend to start with first but this is an alternative to doing all of this via command line. This is a [link](https://youtu.be/yVW8LftDSwg?t=209) to a youtube video titled "C Programming on a Headless Raspberry Pi Part 1: VSCode Server Setup (Pi Zero 2 W)" by "Learn Embedded Systems" and they go through a great way to connect the to RPI and still have a gui. KEEP IN MIND WE DO NOT CARE ABOUT COMPILING OR RUNNING ANY C PROGRAMS THAT ARE DISCUSSED IN THE VIDEO. ONLY DO THE VSCODE RPI INTEGRATION. After you are done your VSCode should look a little something like the photo below. Import areas are surrounded by a pink box.
+I am still figuring out which steps I would recommend to start with first but this is an alternative to doing all of this via command line. This is a [link](https://youtu.be/yVW8LftDSwg?t=209) to a youtube video titled "C Programming on a Headless Raspberry Pi Part 1: VSCode Server Setup (Pi Zero 2 W)" by "Learn Embedded Systems" and they go through a great way to connect the to RPI and still have a gui. KEEP IN MIND WE DO NOT CARE ABOUT COMPILING OR RUNNING ANY C PROGRAMS THAT ARE DISCUSSED IN THE VIDEO. ONLY DO THE VSCODE RPI INTEGRATION. After you are done your VSCode should look a little something like the photo below. Import areas are folder directory on the left and the terminal at the bottom.
 
 ![VSCode.jpg](Docs/VSCodeMainScreen.jpg)
 
