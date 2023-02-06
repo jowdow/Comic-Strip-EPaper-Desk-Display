@@ -317,7 +317,7 @@ int main(void)
             sprintf( month,"%d",( tm.tm_mon + 1 ) ); // JD - We update this here because I only want it to update the month when we know there is a new comic
             sprintf( day,"%d", tm.tm_mday );// JD - We update here because I only want it to update the day when we know there is a new comic
             
-	    system(command);
+	        system(command);
             initCartoonVar();
             initWeatherVar();
             

@@ -1,5 +1,5 @@
-Tonight,ScatteredFlurries,?|12
-Friday,ScatteredFlurries,18|12
-Saturday,Sunny thenMostly Sunnyand Breezy,38|33
-Sunday,Cloudy andBreezy,45|28
-Monday,Partly Sunny,47|39
+Today,Partly Sunny,42|35
+Tuesday,Breezy.Showers thenMostly Cloudy,52|31
+Wednesday,Mostly Cloudy,47|41
+Thursday,ShowersLikely andWindy,58|35
+Friday,Mostly Cloudy,45
