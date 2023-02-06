@@ -265,6 +265,22 @@ int main(void)
     memset(date,0,sizeof(date));
     t= time(NULL);
     tm = *localtime(&t);
+
+    char py[7] = "python";
+    char command[100]="";
+    char directory[80]; 
+    if( getcwd( directory , sizeof(directory) ) != NULL){
+        printf("Current Directory: ");printf(directory);
+        printf("\n");
+        strcat(command,py);
+        strcat(command," ");
+        strcat(command,directory);
+        strcat(command,"/examples/main.py");
+    }
+    else{
+        printf("getcwd() error");
+    }
+
     
     // JD - Initalizing the time just received 
     sprintf( hour,"%d", tm.tm_hour );
@@ -300,7 +316,8 @@ int main(void)
         if((isFirstRun || (char)hour[1]=='6') && !isDataUpdated){ // If it is the first run or the hour is 6 am or 4 pm and data has not been updated
             sprintf( month,"%d",( tm.tm_mon + 1 ) ); // JD - We update this here because I only want it to update the month when we know there is a new comic
             sprintf( day,"%d", tm.tm_mday );// JD - We update here because I only want it to update the day when we know there is a new comic
-            system("python /home/pi/Desktop/cNew/examples/main.py");
+            
+	    system(command);
             initCartoonVar();
             initWeatherVar();
             

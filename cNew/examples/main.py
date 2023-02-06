@@ -172,7 +172,7 @@ def dither(title):
                     if i + 1 < width and j - 1 >= 0:
                         error[i + 1, j - 1] += extracolor * 1 / 16
         print("Done Dithering")
-        Image.fromarray(newbmp).save("/home/pi/Desktop/cNew/"+title+ ".bmp")
+        Image.fromarray(newbmp).save(os.getcwd()+"/"+title+ ".bmp")
 
     except FileNotFoundError:
         file_error(title + ".gif")
@@ -226,7 +226,7 @@ def getAndSaveToFileWeatherData():
     
     
     
-    file = open('/home/pi/Desktop/cNew/weather.txt','w')
+    file = open(os.getcwd()+"/weather.txt",'w')
     
     # JD - This makes sure that there is a space before each capital letter
     # count = 0
@@ -265,7 +265,7 @@ def main():
     print("\n")
     print("Starting Comic Downloads")
     
-    with open('/home/pi/Desktop/cNew/cartoons.txt') as f:
+    with open(os.getcwd()+"/cartoons.txt") as f:
         cartoon = f.readlines()
     # Getting current time
     current_time = datetime.datetime.now()
