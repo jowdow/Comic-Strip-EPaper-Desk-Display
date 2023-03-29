@@ -9,6 +9,36 @@ I am still figuring out which steps I would recommend to start with first but th
 
 ![VSCode.jpg](Docs/VSCodeMainScreen.jpg)
 
+Another thing to note is how you plan on getting the software on the RPI. I used github to download and do my verison control. Below is the command to install git on the RPI.
+```sh
+sudo apt install git
+```
+This will download the repo to your RPI.
+```sh
+git clone https://github.com/jowdow/DeliveryArmCapstone.git
+```
+
 Wave Share gave an amazing tutorial on how to set up the RPI. Here is the [link](https://www.waveshare.com/wiki/5.65inch_e-Paper_Module_(F)_Manual#Working_With_Raspberry_Pi), If you follow it (minus one instruction) you should be able to get up and going pretty fast. The only issue I ran into was getting an error after running the command "sudo apt-get install wiringpi". Just skip the command and follow the instructions in the pink box in the image below.
 
 ![WiringPi.jpg](Docs/WiringPi.jpg)
+
+
+Below are the command and an example of how to commit and push your changes to your fork of the repo.
+```sh
+git commit -a
+```
+```sh
+git push
+```
+![commandsforcommiting.jpg](Docs/commandsforcommiting.jpg)
+
+## Current Bugs / Notes
+This is very much so incomplete code and NOT up to my standard. I will be updating it as I get the time. I currently have a bug in the code however it works mostly well.
+
+![CurrentBug.jpg](Docs/CurrentBugMinuteZeroToMinuteTen.jpg)
+
+## Case
+I have two cases I made. One is for display on wall on my desk for others to see as well and one is for me and will sit beneath my monitor. Below is the wall mounted version and what the internals kind of look like. I WILL BE REMOVING THE TAPE IT IS TEMPORARY.
+![Back.jpg](Docs/Back.jpg)
+![FrontImage.jpg](Docs/FrontImage.jpg)
+![BackImage.jpg](Docs/BackImage.jpg)
