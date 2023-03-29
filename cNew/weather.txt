@@ -1,5 +1,5 @@
-Today,Partly Sunny,42|35
-Tuesday,Breezy.Showers thenMostly Cloudy,52|31
-Wednesday,Mostly Cloudy,47|41
-Thursday,ShowersLikely andWindy,58|35
-Friday,Mostly Cloudy,45
+Tonight,Clear,?|31
+Wednesday,Mostly Sunny,52|23
+Thursday,Sunny,53|43
+Friday,Showers Windy,63|41
+Saturday,Showers Windy,49|26

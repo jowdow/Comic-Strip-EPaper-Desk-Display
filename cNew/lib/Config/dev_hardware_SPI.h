@@ -73,7 +73,7 @@ typedef enum
 
 typedef enum
 {
-    SPI_3WIRE_Mode = 0,
+    EPD_SPI_3WIRE_Mode = 0,
     SPI_4WIRE_Mode = 1
 }BusMode;
 

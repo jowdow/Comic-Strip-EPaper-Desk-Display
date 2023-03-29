@@ -17,9 +17,9 @@
 #define FALSE 0
 enum State {COMIC = 0, MEME = 1, PICS = 2};
 
-//char cartoon[6][20] = {{"garfield"},{"pickles"},{"bc"},{"peanuts"},{"dilbert-classics"}}; // JD - Hard coding the cartoon
-char cartoon[MAX_CARTOONS][MAX_LINE_LENGTH]; // JD - Hard coding the cartoon
-char weather[18][50]; // JD - Hard coding the weather data. i am storing this in a weird way. even though it is a 2d array the second dimension is just to store the chars ex. Day,Description,Temps,Day,Description,Temps,Day,Description,Temps,Day,Description,Temps,Day,Description,Temps,Day,Description,Temps
+//char cartoon_c[6][20] = {{"garfield"},{"pickles"},{"bc"},{"peanuts"},{"dilbert-classics"}}; // JD - Hard coding the cartoon
+char cartoon_c[MAX_CARTOONS][MAX_LINE_LENGTH]; // JD - Hard coding the cartoon
+char weather[18][50]; // JD - I am storing this in a weird way. even though it is a 2d array the second dimension is just to store the chars ex. Day,Description,Temps,Day,Description,Temps,Day,Description,Temps,Day,Description,Temps,Day,Description,Temps,Day,Description,Temps
 
 void  Handler(int signo)
 {
@@ -33,8 +33,6 @@ void  Handler(int signo)
 void initCartoonVar(void)
 {
     FILE* file_ptr;
-    char cartoonName_c[40];
-    char previousChar_c;
     char character_c;
     uint8_t cartoonNumber_u8 = 0;
     uint16_t cartoonCharNumber_u16 = 0;
@@ -51,7 +49,7 @@ void initCartoonVar(void)
             cartoonCharNumber_u16=0;
         }
         else{
-            cartoon[cartoonNumber_u8][cartoonCharNumber_u16] = character_c;
+            cartoon_c[cartoonNumber_u8][cartoonCharNumber_u16] = character_c;
             cartoonCharNumber_u16++;
         }
         
@@ -63,12 +61,9 @@ void initCartoonVar(void)
 void initWeatherVar(void)
 {    
     FILE* file_ptr;
-    char data_c[40];
-    char previousChar_c;
     char character_c;
     uint8_t dataIndex_u8 = 0;
     uint8_t dataTypeIndex_u8 = 0;
-    uint8_t count_u8 = 0;
     
     // Opening file in reading mode
     file_ptr = fopen("weather.txt", "r"); // JD - Opening the file
@@ -113,7 +108,6 @@ int displayComic(char *comic[], char date[], char hour[],char min[])
 
     // JD - Initilzing memory used to display images and setting up those variables used
     UBYTE *comicImage;  // JD - This is the actual image data 
-    /* you have to edit the startup_stm32fxxx.s file and set a big enough heap size */  // JD - IDK what this comment is about but I think they are just reusing code
     UDOUBLE Imagesize = ((EPD_5IN65F_WIDTH % 2 == 0)? (EPD_5IN65F_WIDTH / 2 ): (EPD_5IN65F_WIDTH / 2 + 1)) * EPD_5IN65F_HEIGHT;
     if((comicImage = (UBYTE *)malloc(Imagesize)) == NULL) {
         printf("Failed to apply for blank memory...\r\n");
@@ -122,66 +116,12 @@ int displayComic(char *comic[], char date[], char hour[],char min[])
     Paint_NewImage(comicImage, EPD_5IN65F_WIDTH, EPD_5IN65F_HEIGHT, 0, EPD_5IN65F_WHITE);
     Paint_SetScale(7);
     
-    
-    printf("Showing "); printf("%s",comic); printf("\r\n");
-    
-    // JD - Actually dislaying image
+    // JD - Clearing Display
     Paint_Clear(EPD_5IN65F_WHITE);
-    
-    // TIME START
-    Paint_DrawString_EN(410, 410, "Time ", &Font16, EPD_5IN65F_WHITE, EPD_5IN65F_RED);
-    Paint_DrawString_EN(465, 410, hour, &Font16, EPD_5IN65F_WHITE, EPD_5IN65F_RED);
-    Paint_DrawString_EN(485, 410, ":", &Font16, EPD_5IN65F_WHITE, EPD_5IN65F_RED);
-    Paint_DrawString_EN(495, 410, min, &Font16, EPD_5IN65F_WHITE, EPD_5IN65F_RED);
-    // TIME END
-    
-    // DATE START
-    Paint_DrawString_EN(410, 432, "Date ", &Font16, EPD_5IN65F_WHITE, EPD_5IN65F_RED);
-    Paint_DrawString_EN(465, 432, date, &Font16, EPD_5IN65F_WHITE, EPD_5IN65F_RED);
-    // DATE END
-    
-    Paint_DrawRectangle(1, 200, 150, 448, EPD_5IN65F_RED, DOT_PIXEL_1X1, DRAW_FILL_FULL);
-    
-    // DAY 1 START
-    Paint_DrawString_EN(10, 210, weather[0], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    Paint_DrawString_EN(10, 230, weather[1], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    Paint_DrawString_EN(75, 210, weather[2], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    // DAY 1 END
-    
-    Paint_DrawLine(3, 250, 148, 250, EPD_5IN65F_BLACK, DOT_PIXEL_2X2, LINE_STYLE_SOLID);
-    
-    // DAY 2 START
-    Paint_DrawString_EN(10, 260, weather[3], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    Paint_DrawString_EN(10, 280, weather[4], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    Paint_DrawString_EN(75, 260, weather[5], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    // DAY 2 END
-    
-    Paint_DrawLine(3, 300, 148, 300, EPD_5IN65F_BLACK, DOT_PIXEL_2X2, LINE_STYLE_SOLID);
-    
-    // DAY 3 START
-    Paint_DrawString_EN(10, 310, weather[6], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    Paint_DrawString_EN(10, 330, weather[7], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    Paint_DrawString_EN(75, 310, weather[8], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    // DAY 3 END
-    
-    Paint_DrawLine(3, 350, 148, 350, EPD_5IN65F_BLACK, DOT_PIXEL_2X2, LINE_STYLE_SOLID);
-    
-    // DAY 4 START
-    Paint_DrawString_EN(10, 360, weather[9], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    Paint_DrawString_EN(10, 380, weather[10], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    Paint_DrawString_EN(75, 360, weather[11], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    // DAY 4 END
-    
-    Paint_DrawLine(3, 400, 148, 400, EPD_5IN65F_BLACK, DOT_PIXEL_2X2, LINE_STYLE_SOLID);
-    
-    // DAY 5 START
-    Paint_DrawString_EN(10, 410, weather[12], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    Paint_DrawString_EN(10, 430, weather[13], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    Paint_DrawString_EN(75, 410, weather[14], &Font12, EPD_5IN65F_RED, EPD_5IN65F_WHITE);
-    // DAY 5 END
     
     //strcat(comic,".bmp");
     GUI_ReadBmp_RGB_7Color(comic, 0, 0);
+    printf("Showing "); printf("%s",comic); printf("\r\n");
 	EPD_5IN65F_Display(comicImage);  // JD - Actually displaying the image
     DEV_Delay_ms(5000);
     
@@ -198,14 +138,12 @@ int displayComic(char *comic[], char date[], char hour[],char min[])
 
 void displayInit(UBYTE *BlackImage){
     if(DEV_Module_Init()==0){
-        return -1;
+        return;
     }
     else{
         EPD_5IN65F_Init();
         DEV_Delay_ms(100);
 
-        // JD - Idk why this is comment is here as we are not using an STM32 ...
-        /* you have to edit the startup_stm32fxxx.s file and set a big enough heap size */
         UDOUBLE Imagesize = ((EPD_5IN65F_WIDTH % 2 == 0)? (EPD_5IN65F_WIDTH / 2 ): (EPD_5IN65F_WIDTH / 2 + 1)) * EPD_5IN65F_HEIGHT;
         if((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL) {
             printf("Failed to apply for blank memory...\r\n");
@@ -244,13 +182,13 @@ int main(void)
     // JD - Time declaration 
     time_t t= time(NULL);
     struct tm tm = *localtime(&t);
-    char year[4];
-    char month[2];
-    char day[2];
-    char hour[2];
-    char min[2];
-    char currentComic[30];
-    char date[30];
+    char year_c[4];
+    char month_c[2];
+    char day_c[2];
+    char hour_c[2];
+    char min_c[2];
+    char currentComic_c[30];
+    char date_c[30];
     
 
     char previousMinute = '0';
@@ -262,10 +200,11 @@ int main(void)
     enum State displayState = COMIC;
     
     // JD - Time intialization
-    memset(date,0,sizeof(date));
+    memset(date_c,0,sizeof(date_c));
     t= time(NULL);
     tm = *localtime(&t);
 
+    // JD - Below is a very janky workaround because 
     char py[7] = "python";
     char command[100]="";
     char directory[80]; 
@@ -279,15 +218,15 @@ int main(void)
     }
     else{
         printf("getcwd() error");
-    }
+    } 
 
     
     // JD - Initalizing the time just received 
-    sprintf( hour,"%d", tm.tm_hour );
-    sprintf( min,"%d", tm.tm_min );
-    sprintf( year,"%d",( tm.tm_year + 1900 ) );
-    sprintf( month,"%d",( tm.tm_mon + 1 ) );
-    sprintf( day,"%d", tm.tm_mday );
+    sprintf( hour_c,"%d", tm.tm_hour );
+    sprintf( min_c,"%d", tm.tm_min );
+    sprintf( year_c,"%d",( tm.tm_year + 1900 ) );
+    sprintf( month_c,"%d",( tm.tm_mon + 1 ) );
+    sprintf( day_c,"%d", tm.tm_mday );
     
     initCartoonVar(); // JD - This is needed to init the variable used to call the images which are saved by name
     initWeatherVar();
@@ -295,27 +234,27 @@ int main(void)
     while(TRUE){
         
         // JD - Grabbing time and memset
-        memset(date,0,sizeof(date));
+        memset(date_c,0,sizeof(date_c));
         t= time(NULL);
         tm = *localtime(&t);
         // JD - Initalizing the time just received 
-        sprintf( hour,"%d", tm.tm_hour );
-        sprintf( min,"%d", tm.tm_min );
-        sprintf( year,"%d",( tm.tm_year + 1900 ) );
+        sprintf( hour_c,"%d", tm.tm_hour );
+        sprintf( min_c,"%d", tm.tm_min );
+        sprintf( year_c,"%d",( tm.tm_year + 1900 ) );
 
         
-        if(min[1] != previousMinute){ // JD - We need to know when it is the next minute
-            previousMinute = min[1];
-            printf("Min: ");printf(min);printf("\n");
+        if(min_c[1] != previousMinute){ // JD - We need to know when it is the next minute
+            previousMinute = min_c[1];
+            printf("Min: ");printf(min_c);printf("\n");
             isNewMinute = TRUE;
         }
         else{
             isNewMinute = FALSE;
         }
         
-        if((isFirstRun || (char)hour[1]=='6') && !isDataUpdated){ // If it is the first run or the hour is 6 am or 4 pm and data has not been updated
-            sprintf( month,"%d",( tm.tm_mon + 1 ) ); // JD - We update this here because I only want it to update the month when we know there is a new comic
-            sprintf( day,"%d", tm.tm_mday );// JD - We update here because I only want it to update the day when we know there is a new comic
+        if((isFirstRun || (char)hour_c[1]=='6') && !isDataUpdated){ // If it is the first run or the hour is 6 am or 4 pm and data has not been updated
+            sprintf( month_c,"%d",( tm.tm_mon + 1 ) ); // JD - We update this here because I only want it to update the month when we know there is a new comic
+            sprintf( day_c,"%d", tm.tm_mday );// JD - We update here because I only want it to update the day when we know there is a new comic
             
 	        system(command);
             initCartoonVar();
@@ -327,7 +266,7 @@ int main(void)
             isDataUpdated = FALSE;    
         }
         
-        if( ( (  (char)min[1]=='0' ) && isNewMinute) || isFirstRun){ // JD - If it is 10,20,30,40,50,60  and it is a new minute or it is our first time running
+        if( ( (  (char)min_c[1]=='0' ) && isNewMinute) || isFirstRun){ // JD - If it is 10,20,30,40,50,60  and it is a new minute or it is our first time running
             if(isFirstRun){
                 isFirstRun = FALSE;
             }
@@ -336,30 +275,30 @@ int main(void)
                     cartoonIndex = 0;
                 }
                 // JD - Creating the date
-				strcat(date, year);
-				strcat(date, "-");
-				strcat(date, month); 
-				strcat(date, "-");
-				strcat(date, day); 
+				strcat(date_c, year_c);
+				strcat(date_c, "-");
+				strcat(date_c, month_c); 
+				strcat(date_c, "-");
+				strcat(date_c, day_c); 
 
                 // JD - Printing time and current comic
-                memset(currentComic,0,sizeof(currentComic));
-                printf("Hour: ");printf(hour);printf("\n");
-                printf("Min: ");printf(min);printf("\n");
-                printf("date: ");printf(date);printf("\n");
-                printf("cartoon: ");printf(cartoon[cartoonIndex]);printf("\n");
+                memset(currentComic_c,0,sizeof(currentComic_c));
+                printf("Hour: ");printf(hour_c);printf("\n");
+                printf("Min: ");printf(min_c);printf("\n");
+                printf("date: ");printf(date_c);printf("\n");
+                printf("cartoon: ");printf(cartoon_c[cartoonIndex]);printf("\n");
 				
                 // JD - Joining string to create name of file
-                strcat(currentComic, date);
-                strcat(currentComic, cartoon[cartoonIndex]);
-                strcat(currentComic, ".bmp");
+                strcat(currentComic_c, date_c);
+                strcat(currentComic_c, cartoon_c[cartoonIndex]);
+                strcat(currentComic_c, ".bmp");
                 
-                printf("Trying to open: "); printf(currentComic);
+                printf("Trying to open: "); printf(currentComic_c);
 
                 // JD - Checking if file is there
-                if(access(currentComic,F_OK)==0){
+                if(access(currentComic_c,F_OK)==0){
                     printf("Displaying Comic");printf("\n");printf("\n");
-                    displayComic(currentComic,date,hour,min);
+                    displayComic(currentComic_c,date_c,hour_c,min_c);
                 }
                 else{
                     // JD - There should be a font that is 70 and 30 so i need to do that still
@@ -370,7 +309,7 @@ int main(void)
                     //Paint_DrawString_EN(0, 90, "Type:", &Font20, EPD_5IN65F_RED,EPD_5IN65F_BLACK);
                     //Paint_DrawString_EN(220, 90, "File Error", &Font20, EPD_5IN65F_RED,EPD_5IN65F_BLACK);
                     //Paint_DrawString_EN(10, 140, "Information:", &Font24, EPD_5IN65F_RED,EPD_5IN65F_BLACK);
-                    //Paint_DrawString_EN(10, 170, currentComic, &Font24, EPD_5IN65F_RED,EPD_5IN65F_BLACK);
+                    //Paint_DrawString_EN(10, 170, currentComic_c, &Font24, EPD_5IN65F_RED,EPD_5IN65F_BLACK);
                     //Paint_DrawString_EN(10, 370, u'你犯了一個嚴重的錯誤', &Font20, EPD_5IN65F_RED,EPD_5IN65F_BLACK);
                 }
                 
