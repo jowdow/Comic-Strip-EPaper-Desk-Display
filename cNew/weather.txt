@@ -1,5 +1,6 @@
-Tonight,Clear,?|31
-Wednesday,Mostly Sunny,52|23
-Thursday,Sunny,53|43
-Friday,Showers Windy,63|41
-Saturday,Showers Windy,49|26
+Thursday,light rain,50|73
+Friday,overcast clouds,49|61
+Saturday,overcast clouds,42|52
+Sunday,clear sky,42|52
+Monday,clear sky,44|57
+Tuesday,clear sky,51|52

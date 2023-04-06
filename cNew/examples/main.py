@@ -179,94 +179,64 @@ def dither(title):
 
 
 def getAndSaveToFileWeatherData():
-    htmldata = getdata(
-        "https://forecast.weather.gov/MapClick.php?lat=40.28623500000003&lon=-84.15817499999997#.ZAs0Ph_MJhE")
-    soup = BeautifulSoup(htmldata, 'html.parser')
+    API_KEY = 'b626aaac4fcac9b04f7bcaba40b37368'
+    CITY = 'New York'
+    NUM_DAYS = 7
 
-    weatherData = []
-    weatherBox = soup.find_all('div', class_="tombstone-container")
+    # Make the API request to get the weather data
+    response = requests.get(f'https://api.openweathermap.org/data/2.5/forecast?q={CITY}&appid={API_KEY}&units=imperial')
+    data = response.json()
+
+    # Get the start date and time for the forecast
+    start_date = datetime.datetime.strptime(data['list'][0]['dt_txt'], '%Y-%m-%d %H:%M:%S')
+
+    #
+    date = ""
+    lowTemp = 0.0
+    highTemp = 0.0
+    description = ""
     count = 0
-    for dayInfo in weatherBox:
-        tempArray = []
-        if dayInfo.find(class_="period-name").get_text().find(
-                "NOW") != -1:  # Sometimes there are warnings and I don't care about them so this skips those
-            continue
-
-        if count % 2 == 0:
-            temp = dayInfo.find(class_="period-name").get_text()
-            temp = temp.replace("ThisAfternoon", "Today")
-            temp = temp.replace("Night", "")
-            temp = temp.replace("Day", "")
-            tempArray.append(temp)
-
-            temp = dayInfo.find(class_="short-desc").get_text()
-            first_space = temp.find(" ")
-            second_space = temp.find(" ", first_space + 1)
-            if second_space != -1:
-                temp = temp[:second_space]
-            else:
-                temp = temp
-            temp = temp.replace("Chance", "")
-            temp = temp.replace("then", "")
-            temp = temp.replace("and", "")
-            tempArray.append(temp)
-
-            temp = dayInfo.find(class_="temp").get_text()
-            temp = temp.replace("High: ", "")
-            temp = temp.replace("Low: ", "")
-            temp = temp.replace(" °F", "")
-            temp = temp.replace("⇓", "")
-            temp = temp.replace("⇑", "")
-            tempArray.append(temp)
-
-            weatherData.append(tempArray)
-        else:
-            temp = dayInfo.find(class_="temp").get_text()
-            temp = temp.replace("High: ", "")
-            temp = temp.replace("Low: ", "")
-            temp = temp.replace(" °F", "")
-            temp = temp.replace("⇓", "")
-            temp = temp.replace("⇑", "")
-            # print(temps)
-            weatherData[len(weatherData) - 1][2] += "|" + temp
-        # temp.replace("This","")
-        # temp.replace("Night", "")
-        # print(dayInfo)
-        if count == 0 and tempArray[0] == 'Tonight':
-            weatherData[0][2] = "?|" + weatherData[0][2]
-            count = 0
-        else:
-            count += 1
-
     file = open(os.getcwd() + "/weather.txt", 'w')
 
-    # JD - This makes sure that there is a space before each capital letter
-    # count = 0
-    # countMessage = 0
-    # tempMessage = ""
-    # isNoSpacePresentBefore = 0
-    # for x in range(2):
-    #     tempMessage = ""
-    #     for char in weatherData[x][2]:
-    #         if char.isupper() and count != 0 and isNoSpacePresentBefore:
-    #             tempMessage += " " + char
-    #         else:
-    #             if char == ' ':
-    #                 isNoSpacePresentBefore = 0
-    #             else:
-    #                 isNoSpacePresentBefore = 1
-    #
-    #             tempMessage += char
-    #         count += 1
-    #     weatherData[x][2] = tempMessage
-    #     countMessage += 1
-    for x in range(len(weatherData)):
-        file.write(",".join(weatherData[x]))
-        file.write('\n')
-    for x in weatherData:
-        print(x)
-    print("")
+    # Initialize a dictionary to store high, low, and description for each day
+    daily_temperatures = {}
 
+    # Loop over the forecast data and extract the high, low, and description for each day
+    for item in data['list']:
+        # Get the date and time for this forecast item
+        date_time = datetime.datetime.strptime(item['dt_txt'], '%Y-%m-%d %H:%M:%S')
+
+        # If this item is for a new day, add a new entry to the daily_temperatures dictionary
+        if date_time.date() not in daily_temperatures:
+            daily_temperatures[date_time.date()] = {
+                'high': item['main']['temp_max'],
+                'low': item['main']['temp_min'],
+                'des': item['weather'][0]['description']
+            }
+        # Otherwise, update the high, low, and description if necessary
+        else:
+            if item['main']['temp_max'] > daily_temperatures[date_time.date()]['high']:
+                daily_temperatures[date_time.date()]['high'] = item['main']['temp_max']
+            if item['main']['temp_min'] < daily_temperatures[date_time.date()]['low']:
+                daily_temperatures[date_time.date()]['low'] = item['main']['temp_min']
+            if item['weather'][0]['description'] != daily_temperatures[date_time.date()]['des']:
+                daily_temperatures[date_time.date()]['des'] = item['weather'][0]['description']
+
+        # Stop looping if we have enough days of data
+        if len(daily_temperatures) >= NUM_DAYS:
+            break
+
+    # Print and save the high, low, and description for each day
+    for date, temps in daily_temperatures.items():
+        file.write(date.strftime("%A"))
+        file.write(",")
+        file.write(temps["des"])
+        file.write(",")
+        file.write(str(round(temps["low"])))
+        file.write("|")
+        file.write(str(round(temps["high"])))
+        file.write('\n')
+        print(f'{date.strftime("%A")}: High {temps["high"]:.1f}°F, Low {temps["low"]:.1f}°F , {temps["des"]}')
     file.close()
 
 
@@ -277,13 +247,13 @@ def drawIcon(x, y, description,bmp_image):
     elif "Flurries" in description:
         img2 = Image.open('snowflake_icon.bmp')
         bmp_image.paste(img2, (x, y))
-    elif "Breezy" in description:
+    elif "Clouds" in description:
         img2 = Image.open('cloudy_icon.bmp')
         bmp_image.paste(img2, (x, y))
-    elif "Sunny" in description:
+    elif "Clear" in description:
         img2 = Image.open('sun_icon.bmp')
         bmp_image.paste(img2, (x, y))
-    elif "Thunderstorms" or "T-storms" in description:
+    elif "Thunderstorms" or "T-storms" or "Storms" in description:
         img2 = Image.open('thunder_icon.bmp')
         bmp_image.paste(img2, (x, y))
 
@@ -294,7 +264,8 @@ def saveWeatherDataToImage(title):
 
     # Open the first image you want to insert
     img1 = Image.open(title)
-
+    comicWidth, comicHeight = img1.size
+    
     # Paste the first image at the top left corner of the BMP image
     bmp_image.paste(img1, (0, 0))
 
@@ -314,54 +285,63 @@ def saveWeatherDataToImage(title):
         # split the line by comma
         parts = line.split(',')
         data.append(parts)
+    adjustment = 0
+    if comicHeight <350: # If the comic is small enough to also have the weather 
+        if comicHeight > 190: # If the comic is larger than where we default show weather they need to be moved some
+            adjustment = comicHeight-190
+        draw = ImageDraw.Draw(bmp_image)  # init draw
 
-    draw = ImageDraw.Draw(bmp_image)  # init draw
+        # This is here when i found out 
+        #font_path = os.getcwd() +"/arial.ttf"
+        #font_size = 20
+        #font = ImageFont.truetype(font_path, font_size)
 
-    font_size = 20
-    font = ImageFont.truetype('arial.ttf', font_size)
+        # Time/Date START
+        now = datetime.datetime.now()
+        '''draw.text((410, 410), "Time: ", font= font ,fill="black")
+        draw.text((445, 410), now.strftime("%H:%M:%S"), font= font ,fill="black")
+        draw.text((410, 432), "Date:",font= font , fill="black")
+        draw.text((445, 432), now.strftime("%Y-%m-%d"),font= font , fill="black")'''
+        draw.text((410, 410), "Time: " ,fill="black")
+        draw.text((445, 410), now.strftime("%H:%M:%S") ,fill="black")
+        draw.text((410, 432), "Date:" , fill="black")
+        draw.text((445, 432), now.strftime("%Y-%m-%d") , fill="black")
+        # Time/Date END
 
-    # Time/Date START
-    now = datetime.datetime.now()
-    draw.text((410, 410), "Time: ", font= font ,fill="black")
-    draw.text((445, 410), now.strftime("%H:%M:%S"), font= font ,fill="black")
-    draw.text((410, 432), "Date:",font= font , fill="black")
-    draw.text((445, 432), now.strftime("%Y-%m-%d"),font= font , fill="black")
-    # Time/Date END
+        # DAY 1 START
+        draw.text((10, 240+adjustment), data[0][0], fill="black")
+        draw.text((10, 260+adjustment), data[0][1], fill="black")
+        draw.text((75, 240+adjustment), data[0][2], fill="black")
+        drawIcon(30, 200+adjustment, data[0][1],bmp_image)
+        # DAY 1 END
 
-    # DAY 1 START
-    draw.text((10, 240), data[0][0], fill="black")
-    draw.text((10, 260), data[0][1], fill="black")
-    draw.text((75, 240), data[0][2], fill="black")
-    drawIcon(30, 200, data[0][1],bmp_image)
-    # DAY 1 END
+        # DAY 2 START
+        draw.text((125, 240+adjustment), data[1][0], fill="black")
+        draw.text((125, 260+adjustment), data[1][1], fill="black")
+        draw.text((190, 240+adjustment), data[1][2], fill="black")
+        drawIcon(145, 200+adjustment,data[1][1],bmp_image)
+        # DAY 2 END
 
-    # DAY 2 START
-    draw.text((125, 240), data[1][0], fill="black")
-    draw.text((125, 260), data[1][1], fill="black")
-    draw.text((190, 240), data[1][2], fill="black")
-    drawIcon(145, 200, data[1][1],bmp_image)
-    # DAY 2 END
+        # DAY 3 START
+        draw.text((240, 240+adjustment), data[2][0], fill="black")
+        draw.text((240, 260+adjustment), data[2][1], fill="black")
+        draw.text((305, 240+adjustment), data[2][2], fill="black")
+        drawIcon(260, 200+adjustment, data[2][1],bmp_image)
+        # DAY 3 END
 
-    # DAY 3 START
-    draw.text((240, 240), data[2][0], fill="black")
-    draw.text((240, 260), data[2][1], fill="black")
-    draw.text((305, 240), data[2][2], fill="black")
-    drawIcon(260, 200, data[2][1],bmp_image)
-    # DAY 3 END
+        # DAY 4 START
+        draw.text((355, 240+adjustment), data[3][0], fill="black")
+        draw.text((355, 260+adjustment), data[3][1], fill="black")
+        draw.text((430, 240+adjustment), data[3][2], fill="black")
+        drawIcon(375, 200+adjustment, data[3][1],bmp_image)
+        # DAY 4 END
 
-    # DAY 4 START
-    draw.text((355, 240), data[3][0], fill="black")
-    draw.text((355, 260), data[3][1], fill="black")
-    draw.text((430, 240), data[3][2], fill="black")
-    drawIcon(375, 200, data[3][1],bmp_image)
-    # DAY 4 END
-
-    # DAY 5 START
-    draw.text((480, 240), data[4][0], fill="black")
-    draw.text((480, 260), data[4][1], fill="black")
-    draw.text((545, 240), data[4][2], fill="black")
-    drawIcon(500, 200, data[4][1],bmp_image)
-    # DAY 5 END
+        # DAY 5 START
+        draw.text((480, 240+adjustment), data[4][0], fill="black")
+        draw.text((480, 260+adjustment), data[4][1], fill="black")
+        draw.text((545, 240+adjustment), data[4][2], fill="black")
+        drawIcon(500, 200+adjustment, data[4][1],bmp_image)
+        # DAY 5 END
 
     # The below code is correcting the image so it only has black or white pixels. It can not do color, I would need to add the "getclosest" function
     width, height = bmp_image.size
