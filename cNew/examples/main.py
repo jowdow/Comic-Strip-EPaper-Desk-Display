@@ -179,7 +179,7 @@ def dither(title):
 
 
 def getAndSaveToFileWeatherData():
-    API_KEY = 'b626aaac4fcac9b04f7bcaba40b37368'
+    API_KEY = ''
     CITY = 'New York'
     NUM_DAYS = 7
 

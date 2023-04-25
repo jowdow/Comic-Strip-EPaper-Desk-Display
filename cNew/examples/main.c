@@ -241,35 +241,31 @@ int main(void)
         sprintf( hour_c,"%d", tm.tm_hour );
         sprintf( min_c,"%d", tm.tm_min );
         sprintf( year_c,"%d",( tm.tm_year + 1900 ) );
-
         
-        if(min_c[1] != previousMinute){ // JD - We need to know when it is the next minute
+        if(isFirstRun || min_c[1] != previousMinute){ // JD - We need to know when it is the next minute or the first run
             previousMinute = min_c[1];
-            printf("Min: ");printf(min_c);printf("\n");
+            printf("Current Time: %c%c:%c%c \n \n",hour_c[0],hour_c[1],min_c[0],min_c[1]);
             isNewMinute = TRUE;
         }
         else{
             isNewMinute = FALSE;
         }
-        
-        if((isFirstRun || (char)hour_c[1]=='6') && !isDataUpdated){ // If it is the first run or the hour is 6 am or 4 pm and data has not been updated
-            sprintf( month_c,"%d",( tm.tm_mon + 1 ) ); // JD - We update this here because I only want it to update the month when we know there is a new comic
-            sprintf( day_c,"%d", tm.tm_mday );// JD - We update here because I only want it to update the day when we know there is a new comic
-            
-	        system(command);
-            initCartoonVar();
-            initWeatherVar();
-            
-            isDataUpdated = TRUE;
-        }
-        else{
-            isDataUpdated = FALSE;    
+
+        if((((char)hour_c[0]=='0' && (char)hour_c[1]=='7' && (char)min_c[0]=='5' && (char)min_c[1]=='5') || isFirstRun ) && isNewMinute){ // Update weather and comics if (((time is 7:55) or isFirstRun) and isNewMinute)
+                sprintf( month_c,"%d",( tm.tm_mon + 1 ) ); // JD - We update this here because I only want it to update the month when we know there is a new comic
+                sprintf( day_c,"%d", tm.tm_mday );// JD - We update here because I only want it to update the day when we know there is a new comic
+                
+                system(command);
+                initCartoonVar();
+                initWeatherVar();
         }
         
-        if( ( (  (char)min_c[1]=='0' ) && isNewMinute) || isFirstRun){ // JD - If it is 10,20,30,40,50,60  and it is a new minute or it is our first time running
+        if((((char)min_c[1]=='0') && isNewMinute) || isFirstRun){ // JD - If it is 10,20,30,40,50,60  and it is a new minute or it is our first time running
+
             if(isFirstRun){
                 isFirstRun = FALSE;
             }
+
             if(displayState == COMIC){
                 if(cartoonIndex > cartoonIndexMax){ // JD - Resetting index 
                     cartoonIndex = 0;
@@ -283,17 +279,16 @@ int main(void)
 
                 // JD - Printing time and current comic
                 memset(currentComic_c,0,sizeof(currentComic_c));
-                printf("Hour: ");printf(hour_c);printf("\n");
-                printf("Min: ");printf(min_c);printf("\n");
-                printf("date: ");printf(date_c);printf("\n");
-                printf("cartoon: ");printf(cartoon_c[cartoonIndex]);printf("\n");
+                printf("Current Time: %c%c:%c%c \n",hour_c[0],hour_c[1],min_c[0],min_c[1]);
+                printf("Date: ");printf(date_c);printf("\n");
+                printf("Cartoon: ");printf(cartoon_c[cartoonIndex]);printf("\n");
 				
                 // JD - Joining string to create name of file
                 strcat(currentComic_c, date_c);
                 strcat(currentComic_c, cartoon_c[cartoonIndex]);
                 strcat(currentComic_c, ".bmp");
                 
-                printf("Trying to open: "); printf(currentComic_c);
+                printf("Trying to open: "); printf(currentComic_c);printf("\n");
 
                 // JD - Checking if file is there
                 if(access(currentComic_c,F_OK)==0){
@@ -303,7 +298,7 @@ int main(void)
                 else{
                     // JD - There should be a font that is 70 and 30 so i need to do that still
                     printf("File not present displaying Error message\n");
-                    EPD_5IN65F_Show7Block();
+                    //EPD_5IN65F_Show7Block();
                     //Paint_DrawRectangle(0, 0, 600, 80, EPD_5IN65F_RED, DOT_PIXEL_1X1, DRAW_FILL_FULL);
                     //Paint_DrawString_EN(200, 0, "Error", &Font20, EPD_5IN65F_BLACK, EPD_5IN65F_WHITE);
                     //Paint_DrawString_EN(0, 90, "Type:", &Font20, EPD_5IN65F_RED,EPD_5IN65F_BLACK);
@@ -323,7 +318,7 @@ int main(void)
                 // JD - TODO
             }
         }
-        // JD - Delays for 0.2 Seconds or 200ms
+        // JD - Delays for 0.2 Seconds or 200ms. This is just to do less processing
         DEV_Delay_ms(200);
     }
     
