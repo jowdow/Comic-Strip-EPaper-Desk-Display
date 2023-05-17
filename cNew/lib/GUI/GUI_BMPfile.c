@@ -212,7 +212,7 @@ UBYTE GUI_ReadBmp_RGB_7Color(const char *path, UWORD Xstart, UWORD Ystart)
     
     // Binary file open
     if((fp = fopen(path, "rb")) == NULL) {
-        Debug("Cann't open the file!\n");
+        Debug("Can't open the file!\n");
         exit(0);
     }
 
@@ -220,8 +220,10 @@ UBYTE GUI_ReadBmp_RGB_7Color(const char *path, UWORD Xstart, UWORD Ystart)
     fseek(fp, 0, SEEK_SET);
     fread(&bmpFileHeader, sizeof(BMPFILEHEADER), 1, fp);    //sizeof(BMPFILEHEADER) must be 14
     fread(&bmpInfoHeader, sizeof(BMPINFOHEADER), 1, fp);    //sizeof(BMPFILEHEADER) must be 50
+    #ifdef DEBUGPRINT
     printf("pixel = %d * %d\r\n", bmpInfoHeader.biWidth, bmpInfoHeader.biHeight);
-	
+	#endif
+
     UDOUBLE Image_Byte = bmpInfoHeader.biWidth * bmpInfoHeader.biHeight * 3;
     UBYTE Image[Image_Byte];
     memset(Image, 0xFF, Image_Byte);

@@ -8,6 +8,28 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import os
 
+PATHTOCOMICS = os.getcwd() + "/pic/comics"
+PATHTOCOMICSOtherWay = os.getcwd() + "\pic\comics"
+PATHTOWEATHERTXT = os.getcwd() + "/weather.txt"
+PATHTOCOMICSTXT = os.getcwd() + "/cartoons.txt"
+
+
+# List of available color schemes
+defaultschemes = {
+    # If doindendent == True, treat the RGB values as independent, matching each independently.
+    # In this case, color scheme uses a list of numbers from 0 - 255 called "shades" that represent
+    # the shade of each color
+    # If doindependent == False, match against actual RGB colors. In this case, the color scheme is a
+    # list of RGB colors
+    "rgb": {  #
+        "doindependent": False,
+        "colors": np.array(
+            [(0, 0, 0), (0, 0, 255), (255, 0, 0), (0, 255, 0), (255, 128, 0), (255, 255, 0), (255, 255, 255)])
+        # [(0, 0, 0), (255, 255, 255)])
+    }
+}
+
+
 
 def getdata(url):
     try:
@@ -44,23 +66,6 @@ def floyd_steinberg(image):
 def file_error(inputpath):
     print("Error: File", inputpath, "does not exist.")
     exit(1)
-
-
-# List of available color schemes
-defaultschemes = {
-    # If doindendent == True, treat the RGB values as independent, matching each independently.
-    # In this case, color scheme uses a list of numbers from 0 - 255 called "shades" that represent
-    # the shade of each color
-    # If doindependent == False, match against actual RGB colors. In this case, the color scheme is a
-    # list of RGB colors
-    "rgb": {  #
-        "doindependent": False,
-        "colors": np.array(
-            [(0, 0, 0), (0, 0, 255), (255, 0, 0), (0, 255, 0), (255, 128, 0), (255, 255, 0), (255, 255, 255)])
-        # [(0, 0, 0), (255, 255, 255)])
-    }
-}
-
 
 # some handy functions
 
@@ -130,7 +135,7 @@ def makecolors(colorscheme):
 
 def find_file(file_name):
     # When I want to find a file in a secific place replace os.getcwd() with the path in string form
-    for path, subdirs, files in os.walk(os.getcwd()):
+    for path, subdirs, files in os.walk(PATHTOCOMICS):
         for name in files:
             if (file_name == name):
                 return True
@@ -172,15 +177,15 @@ def dither(title):
                     if i + 1 < width and j - 1 >= 0:
                         error[i + 1, j - 1] += extracolor * 1 / 16
         print("Done Dithering")
-        Image.fromarray(newbmp).save(os.getcwd() + "/" + title + ".bmp")
+        Image.fromarray(newbmp).save(title + ".bmp")
 
     except FileNotFoundError:
         file_error(title + ".gif")
 
 
 def getAndSaveToFileWeatherData():
-    API_KEY = ''
-    CITY = 'New York'
+    API_KEY = 'e17001da248ba8b5ebc499a6e5597a48'
+    CITY = 'Sidney, US'
     NUM_DAYS = 7
 
     # Make the API request to get the weather data
@@ -196,7 +201,7 @@ def getAndSaveToFileWeatherData():
     highTemp = 0.0
     description = ""
     count = 0
-    file = open(os.getcwd() + "/weather.txt", 'w')
+    file = open(PATHTOWEATHERTXT, 'w')
 
     # Initialize a dictionary to store high, low, and description for each day
     daily_temperatures = {}
@@ -240,20 +245,20 @@ def getAndSaveToFileWeatherData():
     file.close()
 
 
-def drawIcon(x, y, description,bmp_image):
-    if "Showers" or "Rain" in description:
+def drawIcon(x, y, description, bmp_image):
+    if description.find("rain") != -1 or description.find("showers") != -1:
         img2 = Image.open('rain_icon.bmp')
         bmp_image.paste(img2, (x, y))
-    elif "Flurries" in description:
+    elif description.find("flurries") != -1:
         img2 = Image.open('snowflake_icon.bmp')
         bmp_image.paste(img2, (x, y))
-    elif "Clouds" in description:
+    elif description.find("clouds") != -1:
         img2 = Image.open('cloudy_icon.bmp')
         bmp_image.paste(img2, (x, y))
-    elif "Clear" in description:
+    elif description.find("clear") != -1:
         img2 = Image.open('sun_icon.bmp')
         bmp_image.paste(img2, (x, y))
-    elif "Thunderstorms" or "T-storms" or "Storms" in description:
+    elif description.find("thunderstorms") != -1 or description.find("t-storms") != -1 or description.find("storms") != -1:
         img2 = Image.open('thunder_icon.bmp')
         bmp_image.paste(img2, (x, y))
 
@@ -265,7 +270,7 @@ def saveWeatherDataToImage(title):
     # Open the first image you want to insert
     img1 = Image.open(title)
     comicWidth, comicHeight = img1.size
-    
+
     # Paste the first image at the top left corner of the BMP image
     bmp_image.paste(img1, (0, 0))
 
@@ -286,15 +291,15 @@ def saveWeatherDataToImage(title):
         parts = line.split(',')
         data.append(parts)
     adjustment = 0
-    if comicHeight <350: # If the comic is small enough to also have the weather 
-        if comicHeight > 190: # If the comic is larger than where we default show weather they need to be moved some
-            adjustment = comicHeight-190
+    if comicHeight < 350:  # If the comic is small enough to also have the weather
+        if comicHeight > 190:  # If the comic is larger than where we default show weather they need to be moved some
+            adjustment = comicHeight - 190
         draw = ImageDraw.Draw(bmp_image)  # init draw
 
-        # This is here when i found out 
-        #font_path = os.getcwd() +"/arial.ttf"
-        #font_size = 20
-        #font = ImageFont.truetype(font_path, font_size)
+        # This is here when i found out
+        # font_path = os.getcwd() +"/arial.ttf"
+        # font_size = 20
+        # font = ImageFont.truetype(font_path, font_size)
 
         # Time/Date START
         now = datetime.datetime.now()
@@ -302,53 +307,53 @@ def saveWeatherDataToImage(title):
         draw.text((445, 410), now.strftime("%H:%M:%S"), font= font ,fill="black")
         draw.text((410, 432), "Date:",font= font , fill="black")
         draw.text((445, 432), now.strftime("%Y-%m-%d"),font= font , fill="black")'''
-        draw.text((410, 410), "Time: " ,fill="black")
-        draw.text((445, 410), now.strftime("%H:%M:%S") ,fill="black")
-        draw.text((410, 432), "Date:" , fill="black")
-        draw.text((445, 432), now.strftime("%Y-%m-%d") , fill="black")
+        draw.text((410, 410), "Time: ", fill="black")
+        draw.text((445, 410), now.strftime("%H:%M:%S"), fill="black")
+        draw.text((410, 432), "Date:", fill="black")
+        draw.text((445, 432), now.strftime("%Y-%m-%d"), fill="black")
         # Time/Date END
 
         # DAY 1 START
-        draw.text((10, 240+adjustment), data[0][0], fill="black")
-        draw.text((10, 260+adjustment), data[0][1], fill="black")
-        draw.text((75, 240+adjustment), data[0][2], fill="black")
-        drawIcon(30, 200+adjustment, data[0][1],bmp_image)
+        draw.text((10, 240 + adjustment), data[0][0], fill="black")
+        draw.text((10, 260 + adjustment), data[0][1], fill="black")
+        draw.text((75, 240 + adjustment), data[0][2], fill="black")
+        drawIcon(30, 200 + adjustment, data[0][1], bmp_image)
         # DAY 1 END
 
         # DAY 2 START
-        draw.text((125, 240+adjustment), data[1][0], fill="black")
-        draw.text((125, 260+adjustment), data[1][1], fill="black")
-        draw.text((190, 240+adjustment), data[1][2], fill="black")
-        drawIcon(145, 200+adjustment,data[1][1],bmp_image)
+        draw.text((125, 240 + adjustment), data[1][0], fill="black")
+        draw.text((125, 260 + adjustment), data[1][1], fill="black")
+        draw.text((190, 240 + adjustment), data[1][2], fill="black")
+        drawIcon(145, 200 + adjustment, data[1][1], bmp_image)
         # DAY 2 END
 
         # DAY 3 START
-        draw.text((240, 240+adjustment), data[2][0], fill="black")
-        draw.text((240, 260+adjustment), data[2][1], fill="black")
-        draw.text((305, 240+adjustment), data[2][2], fill="black")
-        drawIcon(260, 200+adjustment, data[2][1],bmp_image)
+        draw.text((240, 240 + adjustment), data[2][0], fill="black")
+        draw.text((240, 260 + adjustment), data[2][1], fill="black")
+        draw.text((305, 240 + adjustment), data[2][2], fill="black")
+        drawIcon(260, 200 + adjustment, data[2][1], bmp_image)
         # DAY 3 END
 
         # DAY 4 START
-        draw.text((355, 240+adjustment), data[3][0], fill="black")
-        draw.text((355, 260+adjustment), data[3][1], fill="black")
-        draw.text((430, 240+adjustment), data[3][2], fill="black")
-        drawIcon(375, 200+adjustment, data[3][1],bmp_image)
+        draw.text((355, 240 + adjustment), data[3][0], fill="black")
+        draw.text((355, 260 + adjustment), data[3][1], fill="black")
+        draw.text((430, 240 + adjustment), data[3][2], fill="black")
+        drawIcon(375, 200 + adjustment, data[3][1], bmp_image)
         # DAY 4 END
 
         # DAY 5 START
-        draw.text((480, 240+adjustment), data[4][0], fill="black")
-        draw.text((480, 260+adjustment), data[4][1], fill="black")
-        draw.text((545, 240+adjustment), data[4][2], fill="black")
-        drawIcon(500, 200+adjustment, data[4][1],bmp_image)
+        draw.text((480, 240 + adjustment), data[4][0], fill="black")
+        draw.text((480, 260 + adjustment), data[4][1], fill="black")
+        draw.text((545, 240 + adjustment), data[4][2], fill="black")
+        drawIcon(500, 200 + adjustment, data[4][1], bmp_image)
         # DAY 5 END
 
     # The below code is correcting the image so it only has black or white pixels. It can not do color, I would need to add the "getclosest" function
     width, height = bmp_image.size
     array = [(0, 0, 0), (0, 0, 255), (255, 0, 0), (0, 255, 0), (255, 128, 0), (255, 255, 0), (255, 255, 255)]
     # Loop through each pixel in the image
-    x=0
-    y=240
+    x = 0
+    y = 240
     for x in range(width):
         for y in range(height):
             # Get the color value of the pixel at (x, y)
@@ -357,15 +362,14 @@ def saveWeatherDataToImage(title):
             if color not in array:
                 print(f"Pixel at ({x}, {y}): {color}")
                 if color[0] < 174:
-                    bmp_image.putpixel((x, y), (0,0,0))
+                    bmp_image.putpixel((x, y), (0, 0, 0))
                 else:
-                    bmp_image.putpixel((x, y), (255,255,255))
+                    bmp_image.putpixel((x, y), (255, 255, 255))
             else:
                 bmp_image.putpixel((x, y), color)
 
-
     # Save the modified BMP image
-    bmp_image.save(os.getcwd() + "/" + title)
+    bmp_image.save(title)
 
 
 def main():
@@ -375,17 +379,17 @@ def main():
     print("\n")
     print("Starting Comic Downloads")
 
-    with open(os.getcwd() + "/cartoons.txt") as f:
+    with open(PATHTOCOMICSTXT) as f:
         cartoon = f.readlines()
     # Getting current time
     current_time = datetime.datetime.now()
     dateArr = [str(current_time.year), str(current_time.month), str(current_time.day)]
     print(dateArr[0] + "-" + dateArr[1] + "-" + dateArr[2])
 
-    inputPath = str(dateArr[0] + "-" + dateArr[1] + "-" + dateArr[2])
+    inputPath = PATHTOCOMICS + "/" + str(dateArr[0] + "-" + dateArr[1] + "-" + dateArr[2])
     for title in cartoon:
         title = title.replace('\n', '')
-        if not find_file((inputPath + title + ".bmp")):
+        if not find_file((str(dateArr[0] + "-" + dateArr[1] + "-" + dateArr[2])+title + ".bmp")):
             print("Going to: " + "https://www.gocomics.com/" + title + "/" + dateArr[0] + "/" + dateArr[1] + "/" +
                   dateArr[2])
             htmldata = getdata(
@@ -416,7 +420,7 @@ def main():
 
 
         else:
-            print(inputPath + " " + title + " already exists" + "      ")
+            print(str(dateArr[0] + "-" + dateArr[1] + "-" + dateArr[2])+title + " already exists" + "      ")
 
     print("\n")
 

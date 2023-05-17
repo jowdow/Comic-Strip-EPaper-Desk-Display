@@ -2,4 +2,6 @@ garfield
 pickles
 bc
 peanuts
-dilbert-classics
+calvinandhobbes
+wizardofid
+frank-and-ernest

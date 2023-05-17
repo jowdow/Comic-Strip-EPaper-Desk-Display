@@ -206,7 +206,6 @@ static int DEV_Equipment_Testing(void)
 	int fd;
 	char value_str[20];
 	fd = open("/etc/issue", O_RDONLY);
-    printf("Current environment: ");
 	while(1) {
 		if (fd < 0) {
 			Debug( "Read failed Pin\n");
@@ -221,7 +220,7 @@ static int DEV_Equipment_Testing(void)
 				printf("\r\n");
 				break;
 			}
-			printf("%c",value_str[i]);
+			//printf("%c",value_str[i]);
 		}
 		break;
 	}
@@ -284,7 +283,6 @@ Info:
 ******************************************************************************/
 UBYTE DEV_Module_Init(void)
 {
-    printf("/***********************************/ \r\n");
 	if(DEV_Equipment_Testing() < 0) {
 		return 1;
 	}
@@ -312,8 +310,6 @@ UBYTE DEV_Module_Init(void)
 	if(wiringPiSetupGpio() < 0) { //use BCM2835 Pin number table
 		printf("set wiringPi lib failed	!!! \r\n");
 		return 1;
-	} else {
-		printf("set wiringPi lib success !!! \r\n");
 	}
 
 	// GPIO Config
@@ -342,7 +338,6 @@ UBYTE DEV_Module_Init(void)
 #endif
 
 #endif
-    printf("/***********************************/ \r\n");
 	return 0;
 }
 
