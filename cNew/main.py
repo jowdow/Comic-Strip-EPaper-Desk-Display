@@ -184,8 +184,8 @@ def dither(title):
 
 
 def getAndSaveToFileWeatherData():
-    API_KEY = 'e17001da248ba8b5ebc499a6e5597a48'
-    CITY = 'Sidney, US'
+    API_KEY = ''
+    CITY = 'Maumee, US'
     NUM_DAYS = 7
 
     # Make the API request to get the weather data
@@ -195,7 +195,7 @@ def getAndSaveToFileWeatherData():
     # Get the start date and time for the forecast
     start_date = datetime.datetime.strptime(data['list'][0]['dt_txt'], '%Y-%m-%d %H:%M:%S')
 
-    #
+    # Declaring and intializing 
     date = ""
     lowTemp = 0.0
     highTemp = 0.0

@@ -1,6 +1,6 @@
-Wednesday,clear sky,61|63
-Thursday,clear sky,38|69
-Friday,light rain,57|72
-Saturday,clear sky,45|66
-Sunday,few clouds,48|70
-Monday,overcast clouds,52|71
+Wednesday,clear sky,64|73
+Thursday,clear sky,49|61
+Friday,few clouds,45|64
+Saturday,broken clouds,51|69
+Sunday,overcast clouds,54|70
+Monday,clear sky,58|70

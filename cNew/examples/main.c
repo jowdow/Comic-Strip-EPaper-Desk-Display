@@ -181,11 +181,11 @@ void deletePreviousComics(char pathToComicsWithData_c[]){
         sprintf(fullPath_c, "%s%s.bmp", pathToComicsWithData_c, cartoon_c[x]);
         if (remove(fullPath_c) != 0) {// JD - using the file path to try to delete the file
             #ifdef DEBUGPRINT
-            printf("Error deleting file '%s'\n", cartoon_c[x]);
+            printf("Error deleting file '%s' BMP\n", cartoon_c[x]);
             #endif
         } else {
             #ifdef DEBUGPRINT
-            printf("Deleted file '%s'\n", cartoon_c[x]);
+            printf("Deleted file '%s' BMP\n", cartoon_c[x]);
             #endif
         }
         
@@ -193,17 +193,16 @@ void deletePreviousComics(char pathToComicsWithData_c[]){
         sprintf(fullPath_c, "%s%s.gif", pathToComicsWithData_c, cartoon_c[x]);
         if (remove(fullPath_c) != 0) { // JD - using the file path to try to delete the file
             #ifdef DEBUGPRINT
-            printf("Error deleting file '%s'\n", cartoon_c[x]);
+            printf("Error deleting file '%s' GIF\n", cartoon_c[x]);
             #endif
         } else {
             #ifdef DEBUGPRINT
-            printf("Deleted file '%s'\n", cartoon_c[x]);
+            printf("Deleted file '%s' GIF\n", cartoon_c[x]);
             #endif
         }
     }
     printf("\n\n");
 }
-
 
 int isLeapYear(int year) {
     if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
@@ -342,7 +341,7 @@ int main(void)
     
 
 
-    while(FALSE){
+    while(TRUE){
         
         // JD - Grabbing time and memset
         memset(date_c,0,sizeof(date_c));
@@ -353,8 +352,9 @@ int main(void)
         sprintf( min_c,"%d", tm.tm_min );
         sprintf( year_c,"%d",( tm.tm_year + 1900 ) );
         
-        if(isFirstRun || min_c[1] != previousMinute_c || (sizeof(min_c) == 1 && min_c[0] != previousMinute_c)){ // JD - We need to know when it is the next minute or the first run
-            if(sizeof(min_c) == 1){
+        // JD - this is just to print when there is a new minute so we know that the program is running
+        if(isFirstRun || (min_c[1] != NULL && min_c[1] != previousMinute_c) || (min_c[1] == NULL && min_c[0] != previousMinute_c)){ // JD - If it is a singal digit in the minute (:01 - :09) the min_c variable stores a singal digit so we check if the min_c[1] is null to see if it is singal digits
+            if(min_c[1] == NULL){
                 previousMinute_c = min_c[0];
                 isNewMinute = TRUE;
                 printf("Current Time: %c%c:%c%c \n \n",hour_c[0],hour_c[1],'0',min_c[0]);
@@ -368,17 +368,28 @@ int main(void)
             isNewMinute = FALSE;
         }
 
-        // Update weather and comics if (((time is 7:55) or (time is 12:55) or isFirstRun) and isNewMinute). One could argue that this should go in the below if statment that actually displays the image but I want a custom time to run the updating and you can't do to the minute custom data gathering in the below if statment
-        if((((char)hour_c[0]=='7' && (char)min_c[0]=='5' && (char)min_c[1]=='5') || ((char)hour_c[0]=='1' && (char)hour_c[1]=='2' && (char)min_c[0]=='5' && (char)min_c[1]=='5') || isFirstRun ) && isNewMinute){ 
-                sprintf( month_c,"%d",( tm.tm_mon + 1 ) ); // JD - We update this here because I only want it to update the month when we know there is a new comic
-                sprintf( day_c,"%d", tm.tm_mday );// JD - We update here because I only want it to update the day when we know there is a new comic
-                
-                system(command_c);
-                initCartoonVar();
-                initWeatherVar();
+        // JD - Update weather and comics if (((time is 7:48) or (time is 12:55) or isFirstRun) and isNewMinute). One could argue that this should go in the below if statment that actually displays the image but I want a custom time to run the updating and you can't do to the minute custom data gathering in the below if statment
+        if((((char)hour_c[0]=='7' && (char)min_c[0]=='4' && (char)min_c[1]=='8') || ((char)hour_c[0]=='1' && (char)hour_c[1]=='2' && (char)min_c[0]=='4' && (char)min_c[1]=='5') || isFirstRun ) && isNewMinute){ 
+            sprintf( month_c,"%d",( tm.tm_mon + 1 ) ); // JD - We update this here because I only want it to update the month when we know there is a new comic
+            sprintf( day_c,"%d", tm.tm_mday );// JD - We update here because I only want it to update the day when we know there is a new comic
+
+            if((char)hour_c[0]=='1' && (char)hour_c[1]=='2' && (char)min_c[0]=='4' && (char)min_c[1]=='5'){
+                // JD - Creating the date
+                memset(date_c,0,sizeof(date_c));
+                sprintf(date_c, "%s-%s-%s", year_c, month_c, day_c);
+
+                memset(pathToComicsWithData_c,0,sizeof(pathToComicsWithData_c));
+                sprintf(pathToComicsWithData_c, "%s%s/%s", directory_c, comicsDirectory_c,date_c);
+                deletePreviousComics(pathToComicsWithData_c); // JD - Deleting today's comics so that the weather data is updated
+            }
+
+            system(command_c);
+            initCartoonVar();
+            initWeatherVar();
         }
         
-        if( ( (( (char)min_c[1]== '0'  ) && isNewMinute) && (tm.tm_wday > 0 && tm.tm_wday < 6)) || isFirstRun ){ // JD - If (((it is 10,20,30,40,50,60  and it is a new minute ) and it is during the weekday,tm.tm_wday 1-5 is monday-friday) or it is our first time running)
+        // JD - Time to show new picture
+        if( ( (( (char)min_c[1]== '0' || ((char)min_c[1]== NULL && (char)min_c[0]== "0") ) && isNewMinute) && (tm.tm_wday > 0 && tm.tm_wday < 6)) || isFirstRun ){ // JD - If (((it is 00,10,20,30,40,50,60  and it is a new minute ) and it is during the weekday,tm.tm_wday 1-5 is monday-friday) or it is our first time running)
 
             if(isFirstRun){
                 isFirstRun = FALSE;
