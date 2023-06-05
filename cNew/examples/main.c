@@ -31,9 +31,13 @@ void  Handler(int signo)
     exit(0);
 }
 
+
+/**
+ * @brief Opens desired file and initializes the cartoon variable based on the contents of the desired file
+ */
 void initCartoonVar(void)
 {
-    char filename[] = "cartoons.txt";  // Specify the filename
+    char filename[] = "cartoons.txt";  // JD - Specify the filename
     int lineCount = 0;
 
     FILE* file = fopen(filename, "r");
@@ -41,7 +45,7 @@ void initCartoonVar(void)
         printf("Failed to open the file.\n");
     }
 
-    // Read lines from the file
+    // JD - Read lines from the file
     while (fgets(cartoon_c[lineCount], MAX_LINE_LENGTH, file) != NULL) {
         // Remove the newline character if present
         char* newlinePos = strchr(cartoon_c[lineCount], '\n');
@@ -52,7 +56,7 @@ void initCartoonVar(void)
         lineCount++;
 
         if (lineCount >= MAX_CARTOONS) {
-            printf("Maximum line count reached. Some lines may not be read.\n");
+            printf("Maximum line count reached for cartoons. Some cartoons may not have been read.\n");
             break;
         }
     }
@@ -60,6 +64,9 @@ void initCartoonVar(void)
     fclose(file);
 }
 
+/**
+ * @brief Opens desired file and initializes the weather variable based on the contents of the desired file
+ */
 void initWeatherVar(void)
 {    
     FILE* file_ptr;
@@ -74,12 +81,12 @@ void initWeatherVar(void)
     }
     while(!feof(file_ptr)){  // JD - While not the end of the file
         character_c = fgetc(file_ptr); // JD - Getting the next char from the file
-        if(character_c == 10 || character_c == 44){  // JD - 10 is the number for new line. we don't want the new line. I HATE THE NEW LINES BECAUSE C SUCKS ASS TO GET RID OF NEW LINE. ALL MY HOMIES HATE NEW LINES and 44 is equal to ',' in ascii
+        if(character_c == 10 || character_c == 44){  // JD - 10 is the number for new line. We don't want the new line. I HATE THE NEW LINES BECAUSE C SUCKS ASS TO GET RID OF NEW LINE. ALL MY HOMIES HATE NEW LINES and 44 is equal to ',' in ascii
             dataTypeIndex_u8++; // JD - Now that we are at the new line this is a new comic so we need to start recording on the next array
             dataIndex_u8=0;
         }
         else{
-            weather_c[dataTypeIndex_u8][dataIndex_u8] = character_c;// JD - Actually copying the weather data to the local variable
+            weather_c[dataTypeIndex_u8][dataIndex_u8] = character_c;// JD - Actually copying the weather data to the global variable
             dataIndex_u8++;
         }
         
@@ -89,7 +96,20 @@ void initWeatherVar(void)
         
 }
 
-int displayComic(char *comic[], char date[], char hour[],char min[])
+
+/**
+ * @brief Calculates the sum of two integers.
+ *
+ * This function takes two integer parameters and returns their sum.
+ *
+ * @param comic This pointer char array is the full path to the desire image to display
+ *
+ * @return returns 0 if all went well and -1 if error
+ *
+ * @example
+ * int displayStatus = displayComic("/path/2023-5-30bc.bmp");
+ */
+int displayComic(char *comic[])
 {
     if(DEV_Module_Init()!=0){
         return -1;
@@ -136,10 +156,14 @@ int displayComic(char *comic[], char date[], char hour[],char min[])
 
     DEV_Module_Exit();
     return 0;
-    
 }
 
-void displayInit(UBYTE *BlackImage){
+/**
+ * @brief Inits the E-paper module
+ * 
+ * This sends the proper commands to the e-paper to start the ability to send image data
+ */
+void displayInit(){
     if(DEV_Module_Init()==0){
         return;
     }
@@ -149,18 +173,34 @@ void displayInit(UBYTE *BlackImage){
     }
 }
 
+/**
+ * @brief Delays for X number of milliseconds
+ *
+ * @param milliseconds milliseconds to be delayed for
+ */
 void delayMilli(int milliseconds){
     clock_t startTime = clock();
     while(clock() < startTime + milliseconds);
 }
 
+/**
+ * @brief Delays for X number of seconds
+ *
+ * @param seconds seconds to be delayed for
+ */
 void delaySec(int seconds){
     int milliseconds = 1000 * seconds;
     clock_t startTime = clock();
     while(clock() < startTime + milliseconds);
 }
 
-void deletePreviousComics(char pathToComicsWithData_c[]){
+/**
+ * @brief Deletes the comics based on the path 
+ *
+ * @param pathToComicsWithDate_c The path to the comics with the date
+ *
+ */
+void deletePreviousComics(char pathToComicsWithDate_c[]){
     // JD - We need to know how many comics we have so this finds if data is present and adds to a running sum
     uint8_t num_rows_with_data_u8 = 0;
     for(uint8_t i=0;i<MAX_CARTOONS;i++){
@@ -172,13 +212,13 @@ void deletePreviousComics(char pathToComicsWithData_c[]){
         }
     }
 
-    printf("%s\n",pathToComicsWithData_c);
+    printf("%s\n",pathToComicsWithDate_c);
     // JD - This deletes previous .bmp and 0gif files 
     char fullPath_c[300]="";
     for(int x = 0; x<=num_rows_with_data_u8;x++){
         
         memset(fullPath_c,0,sizeof(fullPath_c));
-        sprintf(fullPath_c, "%s%s.bmp", pathToComicsWithData_c, cartoon_c[x]);
+        sprintf(fullPath_c, "%s%s.bmp", pathToComicsWithDate_c, cartoon_c[x]);
         if (remove(fullPath_c) != 0) {// JD - using the file path to try to delete the file
             #ifdef DEBUGPRINT
             printf("Error deleting file '%s' BMP\n", cartoon_c[x]);
@@ -190,7 +230,7 @@ void deletePreviousComics(char pathToComicsWithData_c[]){
         }
         
         memset(fullPath_c,0,sizeof(fullPath_c));
-        sprintf(fullPath_c, "%s%s.gif", pathToComicsWithData_c, cartoon_c[x]);
+        sprintf(fullPath_c, "%s%s.gif", pathToComicsWithDate_c, cartoon_c[x]);
         if (remove(fullPath_c) != 0) { // JD - using the file path to try to delete the file
             #ifdef DEBUGPRINT
             printf("Error deleting file '%s' GIF\n", cartoon_c[x]);
@@ -203,6 +243,7 @@ void deletePreviousComics(char pathToComicsWithData_c[]){
     }
     printf("\n\n");
 }
+
 
 int isLeapYear(int year) {
     if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
@@ -241,6 +282,14 @@ int getLastDayOfMonth(int year, int month) {
     return lastDay;
 }
 
+/**
+ * @brief Finds the previous day and saves that to the variable previousDay
+ *
+ * @param date This char pointer is the current day(EX. 2023-05-03)
+ * 
+ * @param previousDay This char pointer is where the previous day will be saved to
+ *
+ */
 void getPreviousDay(char* date, char* previousDay) {
     int year, month, day;
     sscanf(date, "%d-%d-%d", &year, &month, &day);
@@ -268,8 +317,7 @@ int main(void)
     // Exception handling:ctrl + c
     signal(SIGINT, Handler);
     
-    UBYTE *BlackImage; // Memory for image
-    displayInit(BlackImage);
+    displayInit(); // JD - Initialzing the E-paper
     
     uint8_t isFirstRun = TRUE;
     uint8_t isNewMinute = FALSE;
@@ -284,7 +332,6 @@ int main(void)
     char min_c[2];
     char currentComic_c[300];
     char date_c[30];
-    char previousDayDate_c[30];
     
 
     char previousMinute_c = '0';
@@ -301,7 +348,7 @@ int main(void)
     // JD - Below is getting the current directory and then formatting the command_c to run the python script
     char command_c[200]="";
     char directory_c[100]; 
-    if( getcwd( directory_c , sizeof(directory_c) ) != NULL){ // If current directory is not NULL
+    if( getcwd( directory_c , sizeof(directory_c) ) != NULL){ // JD - If current directory is not NULL
         printf("Current Directory: ");printf(directory_c);
         printf("\n");
         snprintf(command_c, 200, "python %s/main.py", directory_c);
@@ -319,11 +366,12 @@ int main(void)
     sprintf( day_c,"%d", tm.tm_mday );
     
     initCartoonVar(); // JD - This is needed to init the variable used to call the images which are saved by name
-    initWeatherVar();
+
+    // JD - CURRENTLY THIS IS NOT NEEDED BECAUSE THE PYTHON SCRIPT CREATES THE WHOLE IMAGE TO DISPLAY
+    //initWeatherVar(); // JD - This is needed to init the variables used to call the weather data
 
     // JD - This could be put in a better place however cartoonIndexMax is a local variable so that makes it a little harder
-    // JD - This finds how many cartoons we have and then saves that to max so we loop through them all
-    for(uint8_t i=0;i<MAX_CARTOONS;i++){
+    for(uint8_t i=0;i<MAX_CARTOONS;i++){// JD - This finds how many cartoons we have and then saves that to max so we loop through them all
         if (cartoon_c[i][0] != 0) {
                 cartoonIndexMax_u8++;
         }
@@ -331,15 +379,6 @@ int main(void)
             break;
         }
     }
-
-    sprintf(date_c, "%s-%s-%s", year_c, month_c, day_c);
-    getPreviousDay(date_c, previousDayDate_c);
-
-    char pathToComicsWithData_c[300]="";
-    sprintf(pathToComicsWithData_c, "%s%s/%s", directory_c, comicsDirectory_c, previousDayDate_c);
-    deletePreviousComics(pathToComicsWithData_c);
-    
-
 
     while(TRUE){
         
@@ -354,7 +393,7 @@ int main(void)
         
         // JD - this is just to print when there is a new minute so we know that the program is running
         if(isFirstRun || (min_c[1] != NULL && min_c[1] != previousMinute_c) || (min_c[1] == NULL && min_c[0] != previousMinute_c)){ // JD - If it is a singal digit in the minute (:01 - :09) the min_c variable stores a singal digit so we check if the min_c[1] is null to see if it is singal digits
-            if(min_c[1] == NULL){
+            if(min_c[1] == NULL){ // JD - If min_c only has one item this means we need to format a little different due to its size 
                 previousMinute_c = min_c[0];
                 isNewMinute = TRUE;
                 printf("Current Time: %c%c:%c%c \n \n",hour_c[0],hour_c[1],'0',min_c[0]);
@@ -368,24 +407,36 @@ int main(void)
             isNewMinute = FALSE;
         }
 
+        // JD - This is updating variables and then running the command to scrape and dither the comics
         // JD - Update weather and comics if (((time is 7:48) or (time is 12:55) or isFirstRun) and isNewMinute). One could argue that this should go in the below if statment that actually displays the image but I want a custom time to run the updating and you can't do to the minute custom data gathering in the below if statment
         if((((char)hour_c[0]=='7' && (char)min_c[0]=='4' && (char)min_c[1]=='8') || ((char)hour_c[0]=='1' && (char)hour_c[1]=='2' && (char)min_c[0]=='4' && (char)min_c[1]=='5') || isFirstRun ) && isNewMinute){ 
             sprintf( month_c,"%d",( tm.tm_mon + 1 ) ); // JD - We update this here because I only want it to update the month when we know there is a new comic
             sprintf( day_c,"%d", tm.tm_mday );// JD - We update here because I only want it to update the day when we know there is a new comic
 
-            if((char)hour_c[0]=='1' && (char)hour_c[1]=='2' && (char)min_c[0]=='4' && (char)min_c[1]=='5'){
+            
+            char previousDayDate_c[30];
+            sprintf(date_c, "%s-%s-%s", year_c, month_c, day_c);
+            getPreviousDay(date_c, previousDayDate_c);// JD - Getting the previous date based on the current date
+
+            char pathToComicsWithDate_c[300]="";
+            sprintf(pathToComicsWithDate_c, "%s%s/%s", directory_c, comicsDirectory_c, previousDayDate_c);
+            printf("This is the path to the previous day  %s",pathToComicsWithDate_c);
+            deletePreviousComics(pathToComicsWithDate_c);// JD - Using the path to the comics and then deleting previous day's comics
+
+            if((char)hour_c[0]=='1' && (char)hour_c[1]=='2' && (char)min_c[0]=='4' && (char)min_c[1]=='5'){ // JD - If it is 12:45
                 // JD - Creating the date
                 memset(date_c,0,sizeof(date_c));
                 sprintf(date_c, "%s-%s-%s", year_c, month_c, day_c);
 
-                memset(pathToComicsWithData_c,0,sizeof(pathToComicsWithData_c));
-                sprintf(pathToComicsWithData_c, "%s%s/%s", directory_c, comicsDirectory_c,date_c);
-                deletePreviousComics(pathToComicsWithData_c); // JD - Deleting today's comics so that the weather data is updated
+                memset(pathToComicsWithDate_c,0,sizeof(pathToComicsWithDate_c));
+                sprintf(pathToComicsWithDate_c, "%s%s/%s", directory_c, comicsDirectory_c,date_c);
+                deletePreviousComics(pathToComicsWithDate_c); // JD - Deleting today's comics so that newer weather data is grabbed and displayed
             }
 
             system(command_c);
             initCartoonVar();
-            initWeatherVar();
+            // JD - CURRENTLY THIS IS NOT NEEDED BECAUSE THE PYTHON SCRIPT CREATES THE WHOLE IMAGE TO DISPLAY
+            //initWeatherVar(); // JD - This is needed to init the variables used to call the weather data
         }
         
         // JD - Time to show new picture
@@ -419,7 +470,7 @@ int main(void)
                     // JD - Checking if file is there
                     if(access(currentComic_c,F_OK)==0){
                         printf("Displaying Comic");printf("\n");printf("\n");
-                        displayComic(currentComic_c,date_c,hour_c,min_c);
+                        displayComic(currentComic_c);
                     }
                     else{
                         printf("File not present displaying Error message\n");
